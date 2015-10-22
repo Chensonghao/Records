@@ -1,0 +1,11 @@
+.fg-success{
+color:#4cae4c;
+}
+
+.mainbg{
+	background-image: url(../images/main.jpg);
+	background-repeat: no-repeat;
+	background-size:1140px;
+	background-position: 0 -300px;
+	height: 350px !important;
+}
