@@ -156,6 +156,7 @@ function deleteRecordCtrl(recordFactory, $modalInstance, record, $window) {
         $modalInstance.dismiss('cancel');
     };
 
+
     function deleteRecord() {
         recordFactory.deleteRecord(data._id).then(function() {
             $modalInstance.close();
