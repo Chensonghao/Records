@@ -3,7 +3,8 @@ angular.module('records')
     .controller('addRecordCtrl', addRecordCtrl)
     .controller('editRecordCtrl', editRecordCtrl)
     .controller('deleteRecordCtrl', deleteRecordCtrl)
-    .controller('viewRecordCtrl', viewRecordCtrl);
+    .controller('viewRecordCtrl', viewRecordCtrl)
+    .controller('addCardCtrl', addCardCtrl);
 
 listCtrl.$inject = ['recordFactory', '$uibModal']
 
@@ -78,27 +79,38 @@ function listCtrl(recordFactory, $uibModal) {
 
 }
 
-addRecordCtrl.$inject = ['recordFactory', '$modalInstance', '$window']
+addRecordCtrl.$inject = ['recordFactory','cardFactory','$modalInstance', '$window', '$uibModal','pubSubService']
     /*@ngInject*/
-function addRecordCtrl(recordFactory, $modalInstance, $window) {
+function addRecordCtrl(recordFactory, cardFactory, $modalInstance, $window, $uibModal,pubSubService) {
     var vm = this;
-    vm.record = {
-        type: '支出'
-    };
+    vm.record = {};
     vm.types = ['支出', '收入'];
     vm.categories = ['早餐', '午餐'];
-    vm.cards = ['现金', '支付宝', '微信', '工行卡', '招行卡', '交行卡'];
+    //vm.cards = ['现金', '支付宝', '微信', '工行卡', '招行卡', '交行卡'];
     vm.selectedCard = '现金';
-    vm.types=['支出','收入'];
-    vm.selectType='支出';
+    vm.types = ['支出', '收入'];
+    vm.selectedType = '支出';
     vm.addRecord = addRecord;
     vm.changeCard = changeCard;
     vm.changeType = changeType;
+    vm.addCard=function($event){
+        var modalInstance = $uibModal.open({
+            templateUrl: 'addCardModal',
+            controller: 'addCardCtrl',
+            controllerAs: 'acc'
+        });
+        $event.stopPropagation();
+    }
     vm.cancel = function() {
         $modalInstance.dismiss('cancel');
     }
-
+    cardFactory.cards().then(function(cards){
+        vm.cards=cards.data;
+    },function(err){
+        console.log(err);
+    });
     function addRecord() {
+        vm.record.type = vm.selectedType;
         vm.record.card = vm.selectedCard;
         recordFactory.addRecord(vm.record).then(function(data) {
             $modalInstance.close($window.location.reload());
@@ -108,12 +120,16 @@ function addRecordCtrl(recordFactory, $modalInstance, $window) {
     }
 
     function changeType(type) {
-        vm.selectType = type;
+        vm.selectedType = type;
     }
 
-    function changeCard(card) {
-        vm.selectedCard = card;
+    function changeCard(cardName) {
+        vm.selectedCard = cardName;
     }
+    pubSubService.subscribe(function(event,data){
+        vm.cards.push({name:data});
+        vm.selectedCard=data;
+    },'','newCard');
 }
 
 viewRecordCtrl.$inject = ['record', '$modalInstance']
@@ -127,9 +143,9 @@ function viewRecordCtrl(record, $modalInstance) {
         $modalInstance.dismiss('close');
     }
 }
-editRecordCtrl.$inject = ['recordFactory', '$modalInstance', 'record']
+editRecordCtrl.$inject = ['recordFactory', '$window', '$modalInstance', 'record']
     /*@ngInject*/
-function editRecordCtrl(recordFactory, $modalInstance, record) {
+function editRecordCtrl(recordFactory, $window, $modalInstance, record) {
     var vm = this,
         data = record.data.record;
     vm.record = data;
@@ -139,7 +155,11 @@ function editRecordCtrl(recordFactory, $modalInstance, record) {
     }
 
     function saveEdit() {
-        recordFactory.updateRecord(data._id, vm.record).then();
+        recordFactory.updateRecord(data._id, vm.record).then(function() {
+            $modalInstance.close($window.location.reload());
+        }, function(err) {
+            console.log(err);
+        });
     }
 }
 
@@ -164,5 +184,23 @@ function deleteRecordCtrl(recordFactory, $modalInstance, record, $window) {
         }, function(err) {
             console.log(err);
         });
+    }
+}
+
+addCardCtrl.$inject = ['cardFactory', '$modalInstance','pubSubService'];
+/*@ngInject*/
+function addCardCtrl(cardFactory,$modalInstance,pubSubService){
+    var vm=this;
+    vm.cardName='';
+    vm.addCard=function(){
+        cardFactory.addCard({name:vm.cardName}).then(function(){
+            pubSubService.publish('newCard',vm.cardName);
+            $modalInstance.close();
+        },function(err){
+            console.log(err);
+        });
+    }
+    vm.cancel=function(){
+        $modalInstance.dismiss('cancel');
     }
 }

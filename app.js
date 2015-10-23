@@ -32,8 +32,12 @@ app.get('/p/:name', routes.p); //redirect routes
 app.post('/api/addRecord/',api.add);
 app.get('/api/records/',api.records);
 app.get('/api/record/:id',api.record);
-app.put('/api/updateRecordv/:id', api.edit); //edit&update contact
-app.delete('/api/deleteRecord/:id', api.delete); //delete contact
+app.put('/api/updateRecordv/:id', api.edit); 
+app.delete('/api/deleteRecord/:id', api.delete); 
+
+app.get('/api/cards/',api.cards);
+app.post('/api/addCard/',api.addCard);
+app.delete('/api/deleteCard/:id', api.delete); 
 /*======================*/
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

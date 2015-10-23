@@ -12,7 +12,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="record in lc.records" ng-class="lc.typeStyle(record.type)">
+            <tr ng-repeat="record in lc.records | orderBy:'time':true" ng-class="lc.typeStyle(record.type)">
                 <td ng-bind="record.type"></td>
                 <td ng-bind="record.money | currency:'￥'"></td>
                 <td ng-bind="record.time | date:'yyyy/MM/dd HH:mm'"></td>
@@ -26,127 +26,150 @@
     </table>
 </div>
 <!-- add record modal -->
-<script type="text/ng-template" id="addRecordModal" />
-<div modal="recordAdd">
-    <div class="modal-header">
-        <h3>记一笔</h3>
-    </div>
-    <div class="modal-body">
-        <form role="form" class="form-horizontal" ng-model="addForm">
-            <div class="form-group">
-                <label for="inputMoney" class="col-sm-2 control-label">￥</label>
-                <div class="col-sm-6">
-                    <input type="text" class="form-control" id="inputMoney" ng-model="arc.record.money" name="money" placeholder="0.00">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="inputType" class="col-sm-2 control-label">支出/收入</label>
-                <div class="col-sm-6">
-                    <div id="inputType" class="btn-group" uib-dropdown>
-                        <button type="button" class="btn btn-default" uib-dropdown-toggle>
-                            {{arc.selectType}} <span class="caret"></span>
-                        </button>
-                        <ul class="uib-dropdown-menu" role="menu">
-                            <li role="menuitem" ng-repeat="type in arc.types">
-                            	<a href="javascript:;" ng-click="arc.changeType(type)" ng-bind="type"></a>
-                            </li>
-                        </ul>
+<script type="text/ng-template" id="addRecordModal">
+    <div modal="recordAdd">
+        <div class="modal-header">
+            <h3>记一笔</h3>
+        </div>
+        <div class="modal-body">
+            <form role="form" class="form-horizontal">
+                <div class="form-group">
+                    <label for="inputMoney" class="col-sm-2 control-label">￥</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="inputMoney" ng-model="arc.record.money" name="money" placeholder="0.00">
                     </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label" for="inputTime">时间</label>
-                <div class="col-sm-6">
-                    <input type="text" class="form-control" id="inputTime" ng-model="arc.record.time" name="time">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="inputCategory">用途</label>
-                <div class="col-sm-6">
-                    <input type="text" class="form-control" id="inputCategory" ng-model="arc.record.category" name="category">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="inputCard">支付方式</label>
-                <div class="col-sm-6">
-                    <div id="inputCard" class="btn-group" uib-dropdown>
-                        <button type="button" class="btn btn-default" uib-dropdown-toggle>
-                            {{arc.selectedCard}} <span class="caret"></span>
-                        </button>
-                        <ul class="uib-dropdown-menu" role="menu">
-                            <li role="menuitem" ng-repeat="card in arc.cards">
-                                <a href="javascript:;" ng-bind="card" ng-click="arc.changeCard(card)"></a>
-                            </li>
-                            <li class="divider"></li>
-                            <li role="menuitem text-center">
-                                <div class="text-center">
-                                    <button class="btn btn-primary"><i class="glyphicon-plus glyphicon"></i> 新增</button>
-                                </div>
-                            </li>
-                        </ul>
+                <div class="form-group">
+                    <label for="inputType" class="col-sm-2 control-label">支出/收入</label>
+                    <div class="col-sm-6">
+                        <div id="inputType" class="btn-group" uib-dropdown>
+                            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                                {{arc.selectedType}} <span class="caret"></span>
+                            </button>
+                            <ul class="uib-dropdown-menu" role="menu">
+                                <li role="menuitem" ng-repeat="type in arc.types">
+                                    <a href="javascript:;" ng-click="arc.changeType(type)" ng-bind="type"></a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="inputMemo">备注</label>
-                <div class="col-sm-6">
-                    <textarea class="form-control" id="inputMemo" ng-model="arc.record.memo" name="memo"></textarea>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="inputTime">时间</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="inputTime" ng-model="arc.record.time" name="time">
+                    </div>
                 </div>
-            </div>
-        </form>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="inputCategory">用途</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="inputCategory" ng-model="arc.record.category" name="category">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="inputCard">支付方式</label>
+                    <div class="col-sm-6">
+                        <div id="inputCard" class="btn-group" uib-dropdown>
+                            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                                {{arc.selectedCard}} <span class="caret"></span>
+                            </button>
+                            <ul class="uib-dropdown-menu" role="menu">
+                                <li role="menuitem" ng-repeat="card in arc.cards">
+                                    <a href="javascript:;" ng-bind="card.name" ng-click="arc.changeCard(card.name)"></a>
+                                </li>
+                                <li class="divider"></li>
+                                <li role="menuitem text-center">
+                                    <div class="text-center">
+                                        <button type="button" class="btn btn-primary" ng-click="arc.addCard($event)">
+                                            <i class="glyphicon-plus glyphicon"></i> 新增
+                                        </button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="inputMemo">备注</label>
+                    <div class="col-sm-6">
+                        <textarea class="form-control" id="inputMemo" ng-model="arc.record.memo" name="memo"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button ng-click="arc.addRecord()" class="btn btn-info"><i class="icon-plus icon-white"></i> 添加</button>
+            <button class="btn btn-warning cancel" ng-click="arc.cancel()">取消</button>
+        </div>
     </div>
-    <div class="modal-footer">
-        <button ng-click="arc.addRecord()" class="btn btn-info"><i class="icon-plus icon-white"></i> 添加</button>
-        <button class="btn btn-warning cancel" ng-click="arc.cancel()">取消</button>
-    </div>
-</div>
 </script>
 <!-- delete record modal -->
-<script type="text/ng-template" id="deleteRecordModal" />
-<div modal="recordDelete">
-    <div class="modal-header">
-        {{drc.time | date:'yyyy/MM/dd HH:mm'}}&nbsp;&nbsp;{{drc.type}}&nbsp;&nbsp;{{drc.money | currency:'￥'}}
+<script type="text/ng-template" id="deleteRecordModal">
+    <div modal="recordDelete">
+        <div class="modal-header">
+            {{drc.time | date:'yyyy/MM/dd HH:mm'}}&nbsp;&nbsp;{{drc.type}}&nbsp;&nbsp;{{drc.money | currency:'￥'}}
+        </div>
+        <div class="modal-body">
+            <h3>您确定要删除该项记录吗？</h3>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger ok" ng-click="drc.deleteRecord()">删除</button>
+            <button class="btn btn-warning cancel" ng-click="drc.cancel()">取消</button>
+        </div>
     </div>
-    <div class="modal-body">
-        <h3>您确定要删除该项记录吗？</h3>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-danger ok" ng-click="drc.deleteRecord()">删除</button>
-        <button class="btn btn-warning cancel" ng-click="drc.cancel()">取消</button>
-    </div>
-</div>
 </script>
 <!-- view record modal -->
-<script type="text/ng-template" id="viewRecordModal" />
-<div modal="recordView">
-    <div class="modal-header">
-        <h3>{{vrc.record.type}}</h3>
+<script type="text/ng-template" id="viewRecordModal">
+    <div modal="recordView">
+        <div class="modal-header">
+            <h3>{{vrc.record.type}}</h3>
+        </div>
+        <div class="modal-body">
+            <dl class="dl-horizontal">
+                <dt ng-repeat="header in vrc.headers">{{header}}：</dt>
+                <dd ng-bind="vrc.record.money|currency:'￥'"></dd>
+                <dd ng-bind="vrc.record.time|date:'yyyy/MM/dd HH:mm'"></dd>
+                <dd ng-bind="vrc.record.category"></dd>
+                <dd ng-bind="vrc.record.card"></dd>
+                <dd ng-bind="vrc.record.memo || '-'"></dd>
+            </dl>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" ng-click="vrc.cancel()">关闭</button>
+        </div>
     </div>
-    <div class="modal-body">
-        <dl class="dl-horizontal">
-            <dt ng-repeat="header in vrc.headers">{{header}}：</dt>
-            <dd ng-bind="vrc.record.money|currency:'￥'"></dd>
-            <dd ng-bind="vrc.record.time|date:'yyyy/MM/dd HH:mm'"></dd>
-            <dd ng-bind="vrc.record.category"></dd>
-            <dd ng-bind="vrc.record.card"></dd>
-            <dd ng-bind="vrc.record.memo || '-'"></dd>
-        </dl>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-warning" ng-click="vrc.cancel()">关闭</button>
-    </div>
-</div>
 </script>
-<script type="text/ng-template" id="editRecordModal" />
-<div modal="recordEdit">
-    <div class="modal-header">
-        <h3>修改</h3>
+<script type="text/ng-template" id="editRecordModal">
+    <div modal="recordEdit">
+        <div class="modal-header">
+            <h3>修改</h3>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-info" ng-click="erc.saveEdit()">保存</button>
+            <button class="btn btn-warning" ng-click="erc.cancel()">取消</button>
+        </div>
     </div>
-    <div class="modal-body">
+</script>
+<script type="text/ng-template" id="addCardModal">
+    <div modal="addCard">
+        <div class="modal-header">
+            <h3>新增账户</h3>
+        </div>
+        <div class="modal-body">
+            <form role="form" class="form-horizontal">
+                <div class="form-group">
+                    <label for="inputNewCard" class="col-sm-2 control-label">账户名：</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="inputNewCard" ng-model="acc.cardName">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-info" ng-click="acc.addCard()">保存</button>
+            <button type="button" class="btn btn-warning" ng-click="acc.cancel()">取消</button>
+        </div>
     </div>
-    <div class="modal-footer">
-        <button class="btn btn-info" ng-click="erc.saveEdit()">保存</button>
-        <button class="btn btn-warning" ng-click="erc.cancel()">取消</button>
-    </div>
-</div>
 </script>

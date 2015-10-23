@@ -27,8 +27,62 @@ var paySchema = new schema({
         required: false
     },
 });
+
+var cardSchema = new schema({
+    name: {
+        type: String,
+        required: true
+    }
+});
 var payModel = mongoose.model('records', paySchema); //数据库表名records
+var cardModel = mongoose.model('cards', cardSchema);
 mongoose.connect('mongodb://localhost/record'); //数据库名record
+
+exports.cards = function(req, res) {
+    return cardModel.find(function(err, cards) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(cards);
+        }
+    });
+}
+
+exports.addCard = function(req, res) {
+    var data = req.body;
+    var card = new cardModel({
+        name: data.name
+    });
+    card.save(function(err) {
+        if (err) {
+            console.log(err);
+            res.json(false);
+        } else {
+            res.json(true);
+        }
+    });
+}
+exports.deleteCard = function(req, res) {
+    var id = req.params.id;
+    if (id) {
+        cardModel.findById(id, function(err, card) {
+            if (err) {
+                console.log(err);
+                res.json(false);
+            } else {
+                card.remove(function(err) {
+                    if (err) {
+                        console.log(err);
+                        res.json(false);
+                    } else {
+                        res.json(true);
+                    }
+                });
+            }
+        });
+    }
+}
+
 
 exports.records = function(req, res) {
     return payModel.find(function(err, records) {
@@ -48,9 +102,14 @@ exports.record = function(req, res) {
                 console.log(err);
             } else {
                 if (record) {
-                    res.json({record:record,status:true});
-                }else{
-                    res.json({ status: false });
+                    res.json({
+                        record: record,
+                        status: true
+                    });
+                } else {
+                    res.json({
+                        status: false
+                    });
                 }
             }
         });
