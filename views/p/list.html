@@ -1,6 +1,7 @@
 <div class="container">
     <div class="jumbotron mainbg">
-        <h1>Hello, world!</h1>
+        <h1>随手记一笔</h1>
+        <br>
         <p><a class="btn btn-primary btn-lg" ng-click="lc.addRecord()" role="button"><i class="glyphicon-plus glyphicon"></i> 记一笔</a></p>
     </div>
     <table class="table table-hover" ng-show="lc.records.length>0">
@@ -15,7 +16,7 @@
             <tr ng-repeat="record in lc.records | orderBy:'time':true" ng-class="lc.typeStyle(record.type)">
                 <td ng-bind="record.type"></td>
                 <td ng-bind="record.money | currency:'￥'"></td>
-                <td ng-bind="record.time | date:'yyyy/MM/dd HH:mm'"></td>
+                <td ng-bind="record.time | date:'yyyy/MM/dd'"></td>
                 <td>
                     <a href="javascript:;" class="btn btn-info" ng-click="lc.viewRecord(record)"><i class="glyphicon-eye-open glyphicon"></i> 查看</a>
                     <a href="javascript:;" class="btn btn-warning" ng-click="lc.editRecord(record)"><i class="glyphicon-pencil glyphicon"></i> 修改</a>
@@ -26,17 +27,17 @@
     </table>
 </div>
 <!-- add record modal -->
-<script type="text/ng-template" id="addRecordModal">
-    <div modal="recordAdd">
-        <div class="modal-header">
-            <h3>记一笔</h3>
-        </div>
-        <div class="modal-body">
-            <form role="form" class="form-horizontal">
+<script type="text/ng-template" id="addOrUpdateModal">
+    <form role="form" class="form-horizontal" ng-submit="arc.addOrUpdate()">
+        <div modal="addOrUpdateModal">
+            <div class="modal-header">
+                <h3><i class="glyphicon glyphicon-pencil"></i>&nbsp;&nbsp;{{arc.title}}</h3>
+            </div>
+            <div class="modal-body">
                 <div class="form-group">
                     <label for="inputMoney" class="col-sm-2 control-label">￥</label>
                     <div class="col-sm-6">
-                        <input type="text" class="form-control" id="inputMoney" ng-model="arc.record.money" name="money" placeholder="0.00">
+                        <input type="text" class="form-control" id="inputMoney" ng-model="arc.record.money" name="money" placeholder="0.00" required />
                     </div>
                 </div>
                 <div class="form-group">
@@ -57,13 +58,18 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="inputTime">时间</label>
                     <div class="col-sm-6">
-                        <input type="text" class="form-control" id="inputTime" ng-model="arc.record.time" name="time">
+                        <p class="input-group">
+                            <input type="text" id="inputTime" ng-model="arc.record.time" name="time" class="form-control" uib-datepicker-popup="yyyy/MM/dd" is-open="arc.datePickerOpened" close-text="Close" required />
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="arc.openDatePicker()"><i class="glyphicon glyphicon-calendar"></i></button>
+                            </span>
+                        </p>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="control-label col-sm-2" for="inputCategory">用途</label>
                     <div class="col-sm-6">
-                        <input type="text" class="form-control" id="inputCategory" ng-model="arc.record.category" name="category">
+                        <input type="text" class="form-control" id="inputCategory" ng-model="arc.record.category" name="category" required />
                     </div>
                 </div>
                 <div class="form-group">
@@ -95,19 +101,19 @@
                         <textarea class="form-control" id="inputMemo" ng-model="arc.record.memo" name="memo"></textarea>
                     </div>
                 </div>
-            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-info"><i class="icon-plus icon-white"></i> 保存</button>
+                <button class="btn btn-warning cancel" ng-click="arc.cancel()">取消</button>
+            </div>
         </div>
-        <div class="modal-footer">
-            <button ng-click="arc.addRecord()" class="btn btn-info"><i class="icon-plus icon-white"></i> 添加</button>
-            <button class="btn btn-warning cancel" ng-click="arc.cancel()">取消</button>
-        </div>
-    </div>
+    </form>
 </script>
 <!-- delete record modal -->
 <script type="text/ng-template" id="deleteRecordModal">
     <div modal="recordDelete">
         <div class="modal-header">
-            {{drc.time | date:'yyyy/MM/dd HH:mm'}}&nbsp;&nbsp;{{drc.type}}&nbsp;&nbsp;{{drc.money | currency:'￥'}}
+            {{drc.time | date:'yyyy/MM/dd'}}&nbsp;&nbsp;{{drc.type}}&nbsp;&nbsp;{{drc.money | currency:'￥'}}
         </div>
         <div class="modal-body">
             <h3>您确定要删除该项记录吗？</h3>
@@ -128,7 +134,7 @@
             <dl class="dl-horizontal">
                 <dt ng-repeat="header in vrc.headers">{{header}}：</dt>
                 <dd ng-bind="vrc.record.money|currency:'￥'"></dd>
-                <dd ng-bind="vrc.record.time|date:'yyyy/MM/dd HH:mm'"></dd>
+                <dd ng-bind="vrc.record.time|date:'yyyy/MM/dd'"></dd>
                 <dd ng-bind="vrc.record.category"></dd>
                 <dd ng-bind="vrc.record.card"></dd>
                 <dd ng-bind="vrc.record.memo || '-'"></dd>
@@ -136,19 +142,6 @@
         </div>
         <div class="modal-footer">
             <button class="btn btn-warning" ng-click="vrc.cancel()">关闭</button>
-        </div>
-    </div>
-</script>
-<script type="text/ng-template" id="editRecordModal">
-    <div modal="recordEdit">
-        <div class="modal-header">
-            <h3>修改</h3>
-        </div>
-        <div class="modal-body">
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-info" ng-click="erc.saveEdit()">保存</button>
-            <button class="btn btn-warning" ng-click="erc.cancel()">取消</button>
         </div>
     </div>
 </script>

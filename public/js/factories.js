@@ -19,18 +19,34 @@ function recordFactory($http) {
         deleteRecord: function(id) {
             return $http.delete('/api/deleteRecord/' + id);
         },
-        updateRecord: function(id) {
-            return $http.put('/api/updateRecord/' + id);
+        updateRecord: function(id, record) {
+            return $http.put('/api/updateRecord/' + id, record);
         }
     }
 }
 
-cardFactory.$inject = ['$http']
+cardFactory.$inject = ['$http', '$q']
     /*@ngInject*/
-function cardFactory($http) {
+function cardFactory($http, $q) {
     return {
         cards: function() {
-            return $http.get('/api/cards/');
+            var deferred = $q.defer();
+            $http.get('/api/cards/').then(function(result) {
+                var cards = result.data;
+                if (cards) {
+                    [].unshift.call(cards, {
+                        name: '现金'
+                    });
+                } else {
+                    cards = [{
+                        name: '现金'
+                    }];
+                }
+                deferred.resolve(cards);
+            }, function(err) {
+                deferred.reject(err)
+            });
+            return deferred.promise;
         },
         addCard: function(card) {
             return $http.post('/api/addCard/', card);
