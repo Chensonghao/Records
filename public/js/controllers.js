@@ -5,9 +5,9 @@ angular.module('records')
     .controller('viewRecordCtrl', viewRecordCtrl)
     .controller('addCardCtrl', addCardCtrl);
 
-listCtrl.$inject = ['recordFactory', '$uibModal']
+listCtrl.$inject = ['recordFactory', 'statisticsFactory', '$uibModal']
 
-function listCtrl(recordFactory, $uibModal) {
+function listCtrl(recordFactory, statisticsFactory, $uibModal) {
     var vm = this;
     vm.headers = ['支出/收入', '金额', '时间', ''];
     vm.addRecord = addRecord;
@@ -15,12 +15,80 @@ function listCtrl(recordFactory, $uibModal) {
     vm.editRecord = editRecord;
     vm.viewRecord = viewRecord;
     vm.typeStyle = typeStyle;
-    vm.time=new Date;
-    recordFactory.getRecords().then(function(records) {
-        vm.records = records.data;
+    vm.time = new Date;
+    vm.currentPage = 1;
+    vm.pageChanged = function() {
+        initReacors();
+    }
+    initReacors();
+    recordFactory.getCurrentMonthRecords().then(function(records) {
+        var totalIn = statisticsFactory.totalIn(records.data);
+        var totalOut = statisticsFactory.totalOut(records.data);
+        console.log(totalIn, totalOut);
+        vm.chartConfig = {
+            options: {
+                chart: {
+                    type: 'pie'
+                },
+                credits: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>',
+                    style: {
+                        padding: 10,
+                        fontWeight: 'bold'
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            formatter: function() {
+                                return this.point.name + ': ' + this.point.y + '元 <br>(' +
+                                    this.percentage.toFixed(1) + ' %)';
+                            }
+                        }
+                    }
+                },
+            },
+            series: [{
+                type: 'pie',
+                name: '比例',
+                data: [{
+                    name: '收入',
+                    y: totalIn,
+                    color: '#4cae4c',
+                    sliced: true
+                }, {
+                    name: '支出',
+                    y: totalOut,
+                    color: '#cc0033'
+                }]
+            }],
+            title: {
+                text: '当月收支比例'
+            },
+            loading: false,
+            useHighStocks: false,
+            size: {
+                width: 400,
+                height: 400
+            }
+        };
     }, function(err) {
         console.log(err);
     });
+
+    function initReacors() {
+        recordFactory.getRecords(vm.currentPage - 1).then(function(records) {
+            vm.records = records.data.records;
+            vm.totalItems = records.data.count;
+        }, function(err) {
+            console.log(err);
+        });
+    }
 
     function addRecord() {
         var modalInstance = $uibModal.open({
@@ -95,7 +163,9 @@ function addOrUpdateRecordCtrl(recordFactory, cardFactory, $modalInstance, $wind
         vm.selectedCard = record.data.record.card;
         vm.selectedType = record.data.record.type;
     } else {
-        vm.record = {time:new Date()};
+        vm.record = {
+            time: new Date()
+        };
         vm.selectedCard = '现金';
         vm.selectedType = '支出';
     }

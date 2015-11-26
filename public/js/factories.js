@@ -1,6 +1,7 @@
 angular.module('records')
     .factory('recordFactory', recordFactory)
     .factory('cardFactory', cardFactory)
+    .factory('statisticsFactory', statisticsFactory)
     .factory('pubSubService', pubSubService);
 
 recordFactory.$inject = ['$http']
@@ -10,8 +11,8 @@ function recordFactory($http) {
         addRecord: function(record) {
             return $http.post('/api/addRecord/', record);
         },
-        getRecords: function() {
-            return $http.get('/api/records/');
+        getRecords: function(index) {
+            return $http.get('/api/records/' + (index || 0));
         },
         getRecord: function(id) {
             return $http.get('/api/record/' + id);
@@ -21,10 +22,51 @@ function recordFactory($http) {
         },
         updateRecord: function(id, record) {
             return $http.put('/api/updateRecord/' + id, record);
+        },
+        getCurrentMonthRecords: function() {
+            return $http.get('/api/getCurrentMonthRecords/');
         }
     }
 }
 
+function statisticsFactory() {
+    return {
+        totalIn: function(records) {
+            if (records) {
+                var inRecords = records.filter(function(record) {
+                    return record.type === '收入';
+                });
+                if (inRecords && inRecords.length > 0) {
+                    return inRecords.reduce(function(a, b) {
+                        if (typeof(a) === 'object') {
+                            return a.money + b.money;
+                        } else {
+                            return a + b.money;
+                        }
+                    },{money:0});
+                }
+            }
+            return 0;
+        },
+        totalOut: function(records) {
+            if (records) {
+                var outRecords = records.filter(function(record) {
+                    return record.type === '支出';
+                });
+                if (outRecords) {
+                    return outRecords.reduce(function(a, b) {
+                        if (typeof(a) === 'object') {
+                            return a.money + b.money;
+                        } else {
+                            return a + b.money;
+                        }
+                    },{money:0});
+                }
+            }
+            return 0;
+        }
+    }
+}
 cardFactory.$inject = ['$http', '$q']
     /*@ngInject*/
 function cardFactory($http, $q) {

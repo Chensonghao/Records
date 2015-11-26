@@ -1,6 +1,9 @@
 *{
 	font-family: 'microsoft yahei';
 }
+body{
+	background-color: #fff;
+}
 .fg-success {
     color: #4cae4c;
 }

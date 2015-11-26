@@ -85,7 +85,35 @@ exports.deleteCard = function(req, res) {
 
 
 exports.records = function(req, res) {
-    return payModel.find(function(err, records) {
+    var index = req.params.index;
+    return payModel.count(function(err, count) {
+        if (err) {
+            console.log(err);
+        }
+        payModel.find(function(err, records) {
+            if (err) {
+                console.log(err);
+            } else {
+                res.json({
+                    "records": records,
+                    "count": count
+                });
+            }
+        }).sort({
+            time: -1
+        }).skip(10 * index).limit(10);
+    });
+};
+
+exports.getCurrentMonthRecords = function(req, res) {
+    return payModel.find({
+        "$where": function() {
+            var now = new Date(),
+                year = now.getFullYear(),
+                month = now.getMonth();
+            return this.time.getFullYear() === year && this.time.getMonth() === month;
+        }
+    }, function(err, records) {
         if (err) {
             console.log(err);
         } else {
@@ -116,7 +144,7 @@ exports.record = function(req, res) {
     }
 };
 
-exports.add = function(req, res) {
+exports.addRecord = function(req, res) {
     var form = req.body;
     var record = new payModel({
         type: form.type,
@@ -136,7 +164,7 @@ exports.add = function(req, res) {
     });
 };
 
-exports.edit = function(req, res) {
+exports.updateRecord = function(req, res) {
     var id = req.params.id;
     if (id) {
         payModel.findById(id, function(err, record) {
@@ -163,7 +191,7 @@ exports.edit = function(req, res) {
     }
 };
 
-exports.delete = function(req, res) {
+exports.deleteRecord = function(req, res) {
     var id = req.params.id;
     if (id) {
         payModel.findById(id, function(err, record) {

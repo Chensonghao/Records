@@ -4,27 +4,33 @@
         <br>
         <p><a class="btn btn-primary btn-lg" ng-click="lc.addRecord()" role="button"><i class="glyphicon-plus glyphicon"></i> 记一笔</a></p>
     </div>
-    <table class="table table-hover" ng-show="lc.records.length>0">
-        <thead>
-            <tr>
-                <th ng-repeat="header in lc.headers">
-                    <a href="javascript:;" ng-click="columnSort.sortColumn=headers[$index];columnSort.reverse=!columnSort.reverse" ng-bind="header"></a>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="record in lc.records | orderBy:'time':true" ng-class="lc.typeStyle(record.type)">
-                <td ng-bind="record.type"></td>
-                <td ng-bind="record.money | currency:'￥'"></td>
-                <td ng-bind="record.time | date:'yyyy/MM/dd'"></td>
-                <td>
-                    <a href="javascript:;" class="btn btn-info" ng-click="lc.viewRecord(record)"><i class="glyphicon-eye-open glyphicon"></i> 查看</a>
-                    <a href="javascript:;" class="btn btn-warning" ng-click="lc.editRecord(record)"><i class="glyphicon-pencil glyphicon"></i> 修改</a>
-                    <a href="javascript:;" class="btn btn-danger" ng-click="lc.deleteRecord(record)"><i class="glyphicon-trash glyphicon"></i> 删除</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="col-sm-7">
+        <table class="table table-hover" ng-show="lc.records.length>0">
+            <thead>
+                <tr>
+                    <th ng-repeat="header in lc.headers">
+                        <p ng-bind="header"></p>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="record in lc.records | orderBy:'time':true" ng-class="lc.typeStyle(record.type)">
+                    <td ng-bind="record.type"></td>
+                    <td ng-bind="record.money | currency:'￥'"></td>
+                    <td ng-bind="record.time | date:'yyyy/MM/dd'"></td>
+                    <td>
+                        <a href="javascript:;" class="btn btn-info" ng-click="lc.viewRecord(record)"><i class="glyphicon-eye-open glyphicon"></i> 查看</a>
+                        <a href="javascript:;" class="btn btn-warning" ng-click="lc.editRecord(record)"><i class="glyphicon-pencil glyphicon"></i> 修改</a>
+                        <a href="javascript:;" class="btn btn-danger" ng-click="lc.deleteRecord(record)"><i class="glyphicon-trash glyphicon"></i> 删除</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <uib-pagination total-items="lc.totalItems" ng-model="lc.currentPage" ng-change="lc.pageChanged()" previous-text="上一页" next-text="下一页" ng-show="lc.totalItems>0"></uib-pagination>
+    </div>
+    <div class="col-sm-5">
+        <highchart id="chart1" config="lc.chartConfig" ng-show="lc.totalItems>0"></highchart>
+    </div>
 </div>
 <!-- add record modal -->
 <script type="text/ng-template" id="addOrUpdateModal">
@@ -104,7 +110,7 @@
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-info"><i class="icon-plus icon-white"></i> 保存</button>
-                <button class="btn btn-warning cancel" ng-click="arc.cancel()">取消</button>
+                <button type="button" class="btn btn-warning cancel" ng-click="arc.cancel()">取消</button>
             </div>
         </div>
     </form>
