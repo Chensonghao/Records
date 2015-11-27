@@ -102,7 +102,7 @@ exports.records = function(req, res) {
             time: -1
         }).skip(10 * index).limit(10);
     });
-};
+}
 
 exports.getCurrentMonthRecords = function(req, res) {
     return payModel.find({
@@ -119,7 +119,7 @@ exports.getCurrentMonthRecords = function(req, res) {
             res.json(records);
         }
     });
-};
+}
 
 exports.record = function(req, res) {
     var id = req.params.id;
@@ -141,7 +141,7 @@ exports.record = function(req, res) {
             }
         });
     }
-};
+}
 
 exports.addRecord = function(req, res) {
     var form = req.body;
@@ -161,7 +161,7 @@ exports.addRecord = function(req, res) {
             res.json(true);
         }
     });
-};
+}
 
 exports.updateRecord = function(req, res) {
     var id = req.params.id;
@@ -188,7 +188,7 @@ exports.updateRecord = function(req, res) {
             }
         });
     }
-};
+}
 
 exports.deleteRecord = function(req, res) {
     var id = req.params.id;
@@ -209,4 +209,4 @@ exports.deleteRecord = function(req, res) {
             }
         });
     }
-};
+}
