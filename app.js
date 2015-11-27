@@ -5,9 +5,7 @@ var express = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     routes = require('./routes'),
-    users = require('./routes/users'),
-    app = express(),
-    api = require('./routes/api');
+    app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -22,33 +20,20 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/users', users);
 app.locals.pretty = true;
 app.engine('html', require('ejs').renderFile);
+
 app.use('/components', express.static(__dirname + '/components'));
-app.get('/', routes.index);
-app.get('/p/:name', routes.p);
 
-app.post('/api/addRecord/', api.addRecord);
-app.get('/api/records/:index', api.records);
-app.get('/api/record/:id', api.record);
-app.put('/api/updateRecord/:id', api.updateRecord);
-app.delete('/api/deleteRecord/:id', api.deleteRecord);
+routes(app);
 
-app.get('/api/cards/', api.cards);
-app.post('/api/addCard/', api.addCard);
-app.delete('/api/deleteCard/:id', api.deleteCard);
-
-app.get('/api/getCurrentMonthRecords/', api.getCurrentMonthRecords);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
-
 // error handlers
-
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {

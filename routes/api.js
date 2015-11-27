@@ -83,7 +83,6 @@ exports.deleteCard = function(req, res) {
     }
 }
 
-
 exports.records = function(req, res) {
     var index = req.params.index;
     return payModel.count(function(err, count) {
